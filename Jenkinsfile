@@ -2,6 +2,9 @@ pipeline {
     agent any
     environment {
     DOCKERHUB_CREDENTIALS = credentials('ranesh88')
+    AWS_REGION = 'ap-south-1' // Change to your region
+    CLUSTER_NAME = 'Ranesh-Clutser' // Change to your cluster name
+    AWS_CRED_ID = 'aws-eks-cred' // The ID of your credentials in Jenkins    
     }
     tools {
         maven '3.9.12' // Use the name configured in Global Tools
@@ -36,7 +39,26 @@ pipeline {
             steps{
                 sh 'docker push ranesh88/myjavaapp:$BUILD_NUMBER'
             }
-        }    
+        } 
+        stage('Configure Kubeconfig') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CRED_ID}"]]) {
+                    sh "aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME}"
+                }
+            }
+        }
+        stage('Deploy to EKS') {
+            steps {
+                // Assuming your manifest is named deployment.yaml in the root
+                sh "kubectl apply -f deployment.yaml"
+            }
+        }
+        stage('Verify') {
+            steps {
+                sh "kubectl get pods"
+                sh "kubectl get svc"
+            }
+        }
     }
     post {
         always {
