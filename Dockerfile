@@ -7,7 +7,7 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 # Copy your WAR file into the Tomcat webapps directory
 # Tomcat will automatically extract it at startup
 RUN ls -R
-COPY /var/lib/jenkins/workspace/Build/webapp/target/webapp.war /usr/local/tomcat/webapps/ROOT.war
+COPY ./webapp.war /usr/local/tomcat/webapps/ROOT.war
 
 # Expose the default Tomcat port
 EXPOSE 8080
