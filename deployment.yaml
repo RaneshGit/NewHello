@@ -1,0 +1,37 @@
+# 1. Deployment: Defines the Docker image and replicas
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-eks-app
+  labels:
+    app: my-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        # Replace with your Docker Hub or Amazon ECR image URL
+        image: ranesh88/myjavaapp:1
+        ports:
+        - containerPort: 8000
+---
+# 2. Service: Exposes the application to the internet
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+spec:
+  selector:
+    app: my-app
+  ports:
+    - protocol: TCP
+      port: 8005          # External port accessed by users
+      targetPort: 8000    # Port the container is listening on
+  type: LoadBalancer    # Provisions an AWS Network/Classic Load Balancer
